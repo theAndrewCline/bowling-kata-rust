@@ -1,9 +1,8 @@
 fn main() {
-    println!("Hello, world!");
-
     let game = Game::new().roll(10).roll(5).roll(4);
 
     println!("{:?}", game.frames);
+    println!("{:?}", game.score());
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -25,6 +24,10 @@ impl Game {
     }
 
     fn roll(mut self, pins: u32) -> Game {
+        if self.frames.len() >= 11 {
+            panic!("Game is over")
+        }
+
         let cur_frame = self.frames.pop();
 
         match cur_frame {
@@ -138,5 +141,23 @@ mod game_score {
             .roll(10);
 
         assert_eq!(game.score(), 300)
+    }
+
+    #[test]
+    #[should_panic]
+    fn can_not_be_longer_than_11_frames() {
+        Game::new()
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10);
     }
 }
