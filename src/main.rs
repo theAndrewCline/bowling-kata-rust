@@ -6,7 +6,7 @@ fn main() {
     println!("{:?}", game.frames);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 enum Frame {
     Strike,
     Spare,
@@ -14,6 +14,7 @@ enum Frame {
     Incomplete(u32),
 }
 
+#[derive(Debug, Clone)]
 struct Game {
     frames: Vec<Frame>,
 }
@@ -58,13 +59,88 @@ impl Game {
         };
     }
 
-    fn score(self) -> u32 {
-        self.frames.into_iter().fold(0, |acc, value| match value {
-            Frame::Completed(first, second) => acc + first + second,
-            Frame::Incomplete(score) => acc + score,
-            Frame::Spare => acc + 10,
-            Frame::Strike => acc + 10,
-        })
+    fn score(&self) -> u32 {
+        let mut score: u32 = 0;
+
+        for (index, frame) in self.frames.clone().into_iter().enumerate() {
+            let previous_frame = if index > 0 {
+                self.frames.get(index - 1)
+            } else {
+                None
+            };
+
+            let second_previous_frame = if index > 1 {
+                self.frames.get(index - 2)
+            } else {
+                None
+            };
+
+            match frame {
+                Frame::Incomplete(first) => score += first,
+
+                Frame::Completed(first, second) => {
+                    match previous_frame {
+                        Some(f) => match f {
+                            Frame::Strike | Frame::Spare => score += 10,
+                            _ => {}
+                        },
+                        None => {}
+                    };
+
+                    match second_previous_frame {
+                        Some(f) => match f {
+                            Frame::Strike => score += 10,
+                            _ => {}
+                        },
+                        None => {}
+                    };
+
+                    score += first + second
+                }
+
+                Frame::Spare => {
+                    match previous_frame {
+                        Some(f) => match f {
+                            Frame::Strike | Frame::Spare => score += 10,
+                            _ => {}
+                        },
+                        None => {}
+                    };
+
+                    match second_previous_frame {
+                        Some(f) => match f {
+                            Frame::Strike => score += 10,
+                            _ => {}
+                        },
+                        None => {}
+                    };
+
+                    score += 10
+                }
+
+                Frame::Strike => {
+                    match previous_frame {
+                        Some(f) => match f {
+                            Frame::Strike | Frame::Spare => score += 10,
+                            _ => {}
+                        },
+                        None => {}
+                    };
+
+                    match second_previous_frame {
+                        Some(f) => match f {
+                            Frame::Strike => score += 10,
+                            _ => {}
+                        },
+                        None => {}
+                    };
+
+                    score += 10
+                }
+            }
+        }
+
+        return score;
     }
 }
 
@@ -92,7 +168,6 @@ mod tests {
         assert_eq!(Game::new().roll(10).score(), 10)
     }
 
-    #[ignore = "TODO"]
     #[test]
     fn roll_after_strike() {
         let game = Game::new().roll(10).roll(4).roll(5);
@@ -100,10 +175,10 @@ mod tests {
         assert_eq!(game.score(), 29)
     }
 
-    #[ignore = "TODO"]
     #[test]
     fn perfect_game() {
         let game = Game::new()
+            .roll(10)
             .roll(10)
             .roll(10)
             .roll(10)
