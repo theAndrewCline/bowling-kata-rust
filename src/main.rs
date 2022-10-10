@@ -35,11 +35,13 @@ impl Game {
     }
 
     fn score(self) -> u32 {
-        self.frames.into_iter().fold(0, |acc, value| match value {
-            Frame::Completed(first, second) => acc + first + second,
-            Frame::Incomplete(score) => acc + score,
-            Frame::Spare => acc + 10,
-            Frame::Strike => acc + 10,
+        self.frames.into_iter().fold(0, |acc, value| {
+            match value {
+                Frame::Completed(first, second) => acc + first + second,
+                Frame::Incomplete(score) => acc + score,
+                Frame::Spare => acc + 10,
+                Frame::Strike => acc + 10,
+            }
         })
     }
 }
