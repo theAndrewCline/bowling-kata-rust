@@ -77,66 +77,11 @@ impl Game {
 
             match frame {
                 Frame::Incomplete(first) => score += first,
-
                 Frame::Completed(first, second) => {
-                    match previous_frame {
-                        Some(f) => match f {
-                            Frame::Strike | Frame::Spare => score += 10,
-                            _ => {}
-                        },
-                        None => {}
-                    };
-
-                    match second_previous_frame {
-                        Some(f) => match f {
-                            Frame::Strike => score += 10,
-                            _ => {}
-                        },
-                        None => {}
-                    };
-
-                    score += first + second
+                    score += first + second + bonus_points(previous_frame, second_previous_frame)
                 }
-
-                Frame::Spare => {
-                    match previous_frame {
-                        Some(f) => match f {
-                            Frame::Strike | Frame::Spare => score += 10,
-                            _ => {}
-                        },
-                        None => {}
-                    };
-
-                    match second_previous_frame {
-                        Some(f) => match f {
-                            Frame::Strike => score += 10,
-                            _ => {}
-                        },
-                        None => {}
-                    };
-
-                    score += 10
-                }
-
-                Frame::Strike => {
-                    match previous_frame {
-                        Some(f) => match f {
-                            Frame::Strike | Frame::Spare => score += 10,
-                            _ => {}
-                        },
-                        None => {}
-                    };
-
-                    match second_previous_frame {
-                        Some(f) => match f {
-                            Frame::Strike => score += 10,
-                            _ => {}
-                        },
-                        None => {}
-                    };
-
-                    score += 10
-                }
+                Frame::Spare => score += 10 + bonus_points(previous_frame, second_previous_frame),
+                Frame::Strike => score += 10 + bonus_points(previous_frame, second_previous_frame),
             }
         }
 
@@ -144,8 +89,30 @@ impl Game {
     }
 }
 
+fn bonus_points(previous_frame: Option<&Frame>, second_previous_frame: Option<&Frame>) -> u32 {
+    let mut bonus = 0;
+
+    match previous_frame {
+        Some(f) => match f {
+            Frame::Strike | Frame::Spare => bonus += 10,
+            _ => {}
+        },
+        None => {}
+    };
+
+    match second_previous_frame {
+        Some(f) => match f {
+            Frame::Strike => bonus += 10,
+            _ => {}
+        },
+        None => {}
+    };
+
+    return bonus;
+}
+
 #[cfg(test)]
-mod tests {
+mod game_score {
     use super::*;
 
     #[test]
