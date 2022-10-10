@@ -63,25 +63,18 @@ impl Game {
         let mut score: u32 = 0;
 
         for (index, frame) in self.frames.clone().into_iter().enumerate() {
-            let previous_frame = if index > 0 {
-                self.frames.get(index - 1)
-            } else {
-                None
-            };
+            // FIXME: 12 because a game can't be more than 11 frames?
+            let previous_frame = self.frames.get(index.checked_sub(1).unwrap_or(12));
 
-            let second_previous_frame = if index > 1 {
-                self.frames.get(index - 2)
-            } else {
-                None
-            };
+            let second_previous_frame = self.frames.get(index.checked_sub(2).unwrap_or(12));
+
+            let bonus = bonus_points(previous_frame, second_previous_frame);
 
             match frame {
                 Frame::Incomplete(first) => score += first,
-                Frame::Completed(first, second) => {
-                    score += first + second + bonus_points(previous_frame, second_previous_frame)
-                }
-                Frame::Spare => score += 10 + bonus_points(previous_frame, second_previous_frame),
-                Frame::Strike => score += 10 + bonus_points(previous_frame, second_previous_frame),
+                Frame::Completed(first, second) => score += first + second + bonus,
+                Frame::Spare => score += 10 + bonus,
+                Frame::Strike => score += 10 + bonus,
             }
         }
 
@@ -90,25 +83,12 @@ impl Game {
 }
 
 fn bonus_points(previous_frame: Option<&Frame>, second_previous_frame: Option<&Frame>) -> u32 {
-    let mut bonus = 0;
-
-    match previous_frame {
-        Some(f) => match f {
-            Frame::Strike | Frame::Spare => bonus += 10,
-            _ => {}
-        },
-        None => {}
-    };
-
-    match second_previous_frame {
-        Some(f) => match f {
-            Frame::Strike => bonus += 10,
-            _ => {}
-        },
-        None => {}
-    };
-
-    return bonus;
+    match (previous_frame, second_previous_frame) {
+        (Some(Frame::Strike | Frame::Spare), Some(Frame::Strike)) => 20,
+        (Some(Frame::Strike | Frame::Spare), _) => 10,
+        (_, Some(Frame::Strike)) => 10,
+        (_, _) => 0,
+    }
 }
 
 #[cfg(test)]
