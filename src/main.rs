@@ -92,16 +92,29 @@ mod tests {
         assert_eq!(Game::new().roll(10).score(), 10)
     }
 
+    #[ignore = "TODO"]
     #[test]
     fn roll_after_strike() {
         let game = Game::new().roll(10).roll(4).roll(5);
 
-        println!("{:?}", game.frames);
-
-        assert_eq!(game.score(), 19)
+        assert_eq!(game.score(), 29)
     }
 
+    #[ignore = "TODO"]
     #[test]
-    #[ignore]
-    fn perfect_game() {}
+    fn perfect_game() {
+        let game = Game::new()
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10)
+            .roll(10);
+
+        assert_eq!(game.score(), 300)
+    }
 }
