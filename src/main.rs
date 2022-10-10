@@ -63,25 +63,25 @@ impl Game {
     }
 
     fn score(&self) -> u32 {
-        let mut score: u32 = 0;
+        self.frames
+            .clone()
+            .into_iter()
+            .enumerate()
+            .fold(0, |score, (index, frame)| {
+                // FIXME: 12 because a game can't be more than 11 frames?
+                let previous_frame = self.frames.get(index.checked_sub(1).unwrap_or(12));
 
-        for (index, frame) in self.frames.clone().into_iter().enumerate() {
-            // FIXME: 12 because a game can't be more than 11 frames?
-            let previous_frame = self.frames.get(index.checked_sub(1).unwrap_or(12));
+                let second_previous_frame = self.frames.get(index.checked_sub(2).unwrap_or(12));
 
-            let second_previous_frame = self.frames.get(index.checked_sub(2).unwrap_or(12));
+                let bonus = bonus_points(previous_frame, second_previous_frame);
 
-            let bonus = bonus_points(previous_frame, second_previous_frame);
-
-            match frame {
-                Frame::Incomplete(first) => score += first,
-                Frame::Completed(first, second) => score += first + second + bonus,
-                Frame::Spare => score += 10 + bonus,
-                Frame::Strike => score += 10 + bonus,
-            }
-        }
-
-        return score;
+                match frame {
+                    Frame::Incomplete(first) => score + first,
+                    Frame::Completed(first, second) => score + first + second + bonus,
+                    Frame::Spare => score + 10 + bonus,
+                    Frame::Strike => score + 10 + bonus,
+                }
+            })
     }
 }
 
