@@ -24,7 +24,7 @@ impl Game {
     }
 
     fn roll(mut self, pins: u32) -> Game {
-        if self.frames.len() >= 11 {
+        if self.frames.len() >= 12 {
             panic!("Game is over")
         }
 
@@ -138,6 +138,7 @@ mod game_score {
             .roll(10)
             .roll(10)
             .roll(10)
+            .roll(10)
             .roll(10);
 
         assert_eq!(game.score(), 300)
@@ -147,6 +148,7 @@ mod game_score {
     #[should_panic]
     fn can_not_be_longer_than_11_frames() {
         Game::new()
+            .roll(10)
             .roll(10)
             .roll(10)
             .roll(10)
